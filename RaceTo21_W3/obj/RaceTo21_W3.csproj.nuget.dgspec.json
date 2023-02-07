@@ -1,0 +1,65 @@
+{
+  "format": 1,
+  "restore": {
+    "/Users/jay/NU/DGM6308_Winter2023/RaceTo21_W3_Starter/RaceTo21_W3/RaceTo21_W3.csproj": {}
+  },
+  "projects": {
+    "/Users/jay/NU/DGM6308_Winter2023/RaceTo21_W3_Starter/RaceTo21_W3/RaceTo21_W3.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/Users/jay/NU/DGM6308_Winter2023/RaceTo21_W3_Starter/RaceTo21_W3/RaceTo21_W3.csproj",
+        "projectName": "RaceTo21_W3",
+        "projectPath": "/Users/jay/NU/DGM6308_Winter2023/RaceTo21_W3_Starter/RaceTo21_W3/RaceTo21_W3.csproj",
+        "packagesPath": "/Users/jay/.nuget/packages/",
+        "outputPath": "/Users/jay/NU/DGM6308_Winter2023/RaceTo21_W3_Starter/RaceTo21_W3/obj/",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "/usr/local/share/dotnet/sdk/NuGetFallbackFolder"
+        ],
+        "configFilePaths": [
+          "/Users/jay/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net5.0"
+        ],
+        "sources": {
+          "/usr/local/share/dotnet/library-packs": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net5.0": {
+            "targetAlias": "net5.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net5.0": {
+          "targetAlias": "net5.0",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/7.0.102/RuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,29 @@
+﻿<Properties StartupConfiguration="{332467CF-8722-442C-862A-560A544AB615}|Default">
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MonoDevelop.Ide.Workbench ActiveDocument="RaceTo21_W3/Deck.cs">
+    <Files>
+      <File FileName="RaceTo21_W3/Program.cs" />
+      <File FileName="RaceTo21_W3/Player.cs" />
+      <File FileName="RaceTo21_W3/CardTable.cs" />
+      <File FileName="RaceTo21_W3/Deck.cs" Line="1" Column="1" />
+      <File FileName="RaceTo21_W3/Game.cs" Line="1" Column="1" />
+    </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State name="__root__">
+          <Node name="RaceTo21_W3_Starter" expanded="True">
+            <Node name="RaceTo21" expanded="True">
+              <Node name="Deck.cs" selected="True" />
+            </Node>
+          </Node>
+        </State>
+      </Pad>
+    </Pads>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.ItemProperties.RaceTo21 PreferredExecutionTarget="MonoDevelop.Default" />
+  <MultiItemStartupConfigurations />
+</Properties>

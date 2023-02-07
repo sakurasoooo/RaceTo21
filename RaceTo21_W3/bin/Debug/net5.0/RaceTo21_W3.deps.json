@@ -1,0 +1,23 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v5.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v5.0": {
+      "RaceTo21_W3/1.0.0": {
+        "runtime": {
+          "RaceTo21_W3.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "RaceTo21_W3/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}
