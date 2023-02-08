@@ -1,8 +1,12 @@
 {
   "version": 2,
-  "dgSpecHash": "8fXbeCDzWvaKAuGCOHRyI6WuOfRRB1tbywZ2zVx4nW+k6fim4z96lRX3VffaMqrWW+pFc+5gL9yrsC17a3vFuA==",
+  "dgSpecHash": "8EFXfx/RZpyNhXVL2VLyqsnPnQftlDm+qtB/4l1pelxfQWmpjB1pLmb8UqlE2HglK/CiTkt7ZGJdellzfm/q5g==",
   "success": true,
-  "projectFilePath": "/Users/jay/NU/DGM6308_Winter2023/RaceTo21_W4_Starter/RaceTo21_W3/RaceTo21.csproj",
-  "expectedPackageFiles": [],
+  "projectFilePath": "/Users/miku/Documents/CSProject/RaceTo21_W4_Starter/RaceTo21_W3/RaceTo21.csproj",
+  "expectedPackageFiles": [
+    "/Users/miku/.nuget/packages/microsoft.aspnetcore.app.ref/5.0.0/microsoft.aspnetcore.app.ref.5.0.0.nupkg.sha512",
+    "/Users/miku/.nuget/packages/microsoft.netcore.app.host.osx-x64/5.0.17/microsoft.netcore.app.host.osx-x64.5.0.17.nupkg.sha512",
+    "/Users/miku/.nuget/packages/microsoft.netcore.app.ref/5.0.0/microsoft.netcore.app.ref.5.0.0.nupkg.sha512"
+  ],
   "logs": []
 }

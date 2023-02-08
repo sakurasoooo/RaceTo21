@@ -6,40 +6,27 @@ namespace RaceTo21
 {
     public class Deck
     {
-        List<string> cards = new List<string>();
+        List<Card> cards = new List<Card>();
+
+        List<Card> cardsCopy;
 
         public Deck()
         {
             Console.WriteLine("*********** Building deck...");
-            string[] suits = { "S", "H", "C", "D" };
+            CardSuit[] suits = { CardSuit.Clubs, CardSuit.Diamonds, CardSuit.Hearts, CardSuit.Spades };
 
             for (int cardVal = 1; cardVal <= 13; cardVal++)
             {
-                foreach (string cardSuit in suits)
+                foreach (var cardSuit in suits)
                 {
-                    string cardName;
-                    switch (cardVal)
-                    {
-                        case 1:
-                            cardName = "A";
-                            break;
-                        case 11:
-                            cardName = "J";
-                            break;
-                        case 12:
-                            cardName = "Q";
-                            break;
-                        case 13:
-                            cardName = "K";
-                            break;
-                        default:
-                            cardName = cardVal.ToString();
-                            break;
-                    }
-                    cards.Add(cardName + cardSuit);
+                    cards.Add(new Card(cardSuit, (CardName)cardVal));
+
                 }
             }
+
+            BuildDeck();
         }
+
 
         public void Shuffle()
         {
@@ -52,12 +39,12 @@ namespace RaceTo21
 
             // multi-line method that uses Array notation on a list!
             // (this should be easier to understand)
-            for (int i=0; i<cards.Count; i++)
+            for (int i = 0; i < cardsCopy.Count; i++)
             {
-                string tmp = cards[i];
-                int swapindex = rng.Next(cards.Count);
-                cards[i] = cards[swapindex];
-                cards[swapindex] = tmp;
+                Card tmp = cardsCopy[i];
+                int swapindex = rng.Next(cardsCopy.Count);
+                cardsCopy[i] = cardsCopy[swapindex];
+                cardsCopy[swapindex] = tmp;
             }
         }
 
@@ -69,25 +56,36 @@ namespace RaceTo21
 
         public void ShowAllCards()
         {
-            for (int i=0; i<cards.Count; i++)
+            for (int i = 0; i < cardsCopy.Count; i++)
             {
-                Console.Write(i+":"+cards[i]); // a list property can look like an Array!
-                if (i < cards.Count -1)
+                Console.Write(i + ":" + cardsCopy[i]); // a list property can look like an Array!
+                if (i < cardsCopy.Count - 1)
                 {
                     Console.Write(" ");
-                } else
+                }
+                else
                 {
                     Console.WriteLine("");
                 }
             }
         }
 
-        public string DealTopCard()
+        public Card DealTopCard()
         {
-            string card = cards[cards.Count - 1];
-            cards.RemoveAt(cards.Count - 1);
+            Card card = cardsCopy[cardsCopy.Count - 1];
+            cardsCopy.RemoveAt(cardsCopy.Count - 1);
             // Console.WriteLine("I'm giving you " + card);
             return card;
+        }
+
+        public List<Card> GetCards()
+        {
+            return cards.ToList();
+        }
+
+        public void BuildDeck()
+        {
+            cardsCopy = GetCards();
         }
     }
 }

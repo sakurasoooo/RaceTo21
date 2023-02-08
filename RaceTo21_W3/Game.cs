@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 
+using System.Linq;
+using System.Numerics;
+
 namespace RaceTo21
 {
     public class Game
@@ -10,15 +13,24 @@ namespace RaceTo21
         CardTable cardTable; // object in charge of displaying game information
         Deck deck = new Deck(); // deck of cards
         int currentPlayer = 0; // current player on list
-        public string nextTask; // keeps track of game state
+        public NextTask nextTask; // keeps track of game state
         private bool cheating = false; // lets you cheat for testing purposes if true
+        int targetScore = 50; // the end condition of game
+        int rounds = 0; // the number of  rounds of game goes
 
         public Game(CardTable c)
         {
+            Console.ForegroundColor = ConsoleColor.DarkGreen;
             cardTable = c;
             deck.Shuffle();
-            deck.ShowAllCards();
-            nextTask = "GetNumberOfPlayers";
+
+            deck.ShowAllCards();// Comment out this LINE
+
+            nextTask = NextTask.GetNumberOfPlayers;
+            
+            //Test
+            cardTable.InitializeCardImagePath(deck);// Comment out this LINE
+            Console.ResetColor();
         }
 
         /* Adds a player to the current game
@@ -34,85 +46,127 @@ namespace RaceTo21
          * Calls methods required to complete task
          * then sets nextTask.
          */
+
         public void DoNextTask()
         {
             Console.WriteLine("================================"); // this line should be elsewhere right?
-            if (nextTask == "GetNumberOfPlayers")
+            /*
+         * 
+         * Changed IFs to Switch for reading more easily
+         * 
+         */
+            switch (nextTask)
             {
-                numberOfPlayers = cardTable.GetNumberOfPlayers();
-                nextTask = "GetNames";
-            }
-            else if (nextTask == "GetNames")
-            {
-                for (var count = 1; count <= numberOfPlayers; count++)
-                {
-                    var name = cardTable.GetPlayerName(count);
-                    AddPlayer(name); // NOTE: player list will start from 0 index even though we use 1 for our count here to make the player numbering more human-friendly
-                }
-                nextTask = "IntroducePlayers";
-            }
-            else if (nextTask == "IntroducePlayers")
-            {
-                cardTable.ShowPlayers(players);
-                nextTask = "PlayerTurn";
-            }
-            else if (nextTask == "PlayerTurn")
-            {
-                cardTable.ShowHands(players);
-                Player player = players[currentPlayer];
-                if (player.status == PlayerStatus.active)
-                {
-                    if (cardTable.OfferACard(player))
+                case NextTask.GetNumberOfPlayers:
+
+                    numberOfPlayers = cardTable.GetNumberOfPlayers();
+                    nextTask = NextTask.GetNames;
+                    break;
+
+                case NextTask.GetNames:
+
+                    for (var count = 1; count <= numberOfPlayers; count++)
                     {
-                        string card = deck.DealTopCard();
-                        player.cards.Add(card);
-                        player.score = ScoreHand(player);
-                        if (player.score > 21)
+                        var name = cardTable.GetPlayerName(count);
+                        AddPlayer(name); // NOTE: player list will start from 0 index even though we use 1 for our count here to make the player numbering more human-friendly
+                    }
+                    nextTask = NextTask.IntroducePlayers;
+                    break;
+
+                case NextTask.IntroducePlayers:
+
+                    cardTable.ShowPlayers(players);
+                    nextTask = NextTask.PlayerTurn;
+                    break;
+
+                case NextTask.PlayerTurn:
+
+                    cardTable.ShowHands(players);
+                    Player player = players[currentPlayer];
+                    if (player.status == PlayerStatus.active)
+                    {
+                        player.RoundStart();// use for final score
+                        if (cardTable.OfferACard(player))
                         {
-                            player.status = PlayerStatus.bust;
+                            Card card = deck.DealTopCard();
+                            player.cards.Add(card);
+                            int playerScore = ScoreHand(player);
+                            if (playerScore > 21)
+                            {
+                                player.status = PlayerStatus.bust;
+                            }
+                            else if (playerScore == 21)
+                            {
+                                player.status = PlayerStatus.win;
+                            }
                         }
-                        else if (player.score == 21)
+                        else
                         {
-                            player.status = PlayerStatus.win;
+                            player.status = PlayerStatus.stay;
+                        }
+                    }
+                    cardTable.ShowHand(player);
+                    nextTask = NextTask.CheckForEnd;
+                    break;
+
+                case NextTask.CheckForEnd:
+                    Player winner = null;
+                    if (!CheckRoundEnd(ref winner))
+                    {
+                        rounds++; // increase at the end of each ROUND
+                        cardTable.ShowHands(players);
+                        cardTable.AnnounceRoundWinner(winner);
+
+                        /*
+                         * 
+                         * Change win condition here
+                         * depends on rounds or score
+                         * 
+                         */
+                        DoScoring(winner);
+                        cardTable.ShowScoreBoard(players, targetScore);
+                        // ask all players if want to continue
+                        if (cardTable.AskExitGame())
+                        {
+                            nextTask = NextTask.GameOver;
+                            break;
+                        }
+                        if (DoFinalScoring())
+                        {
+                            nextTask = NextTask.GameOver;
+                        }else
+                        {
+                            // Start New turn
+                            // CardTable print new turn msg
+                            // shuffle players etc
+                            ResetRound(true, winner);
+                            nextTask = NextTask.PlayerTurn;
                         }
                     }
                     else
                     {
-                        player.status = PlayerStatus.stay;
+                        currentPlayer++;
+                        if (currentPlayer > players.Count - 1)
+                        {
+                            currentPlayer = 0; // back to the first player...
+                        }
+                        nextTask = NextTask.PlayerTurn;
                     }
-                }
-                cardTable.ShowHand(player);
-                nextTask = "CheckForEnd";
-            }
-            else if (nextTask == "CheckForEnd")
-            {
-                if (!CheckActivePlayers())
-                {
-                    Player winner = DoFinalScoring();
-                    cardTable.AnnounceWinner(winner);
-                    nextTask = "GameOver";
-                }
-                else
-                {
-                    currentPlayer++;
-                    if (currentPlayer > players.Count - 1)
-                    {
-                        currentPlayer = 0; // back to the first player...
-                    }
-                    nextTask = "PlayerTurn";
-                }
-            }
-            else // we shouldn't get here...
-            {
-                Console.WriteLine("I'm sorry, I don't know what to do now!");
-                nextTask = "GameOver";
+
+                    break;
+
+                default:
+
+                    Console.WriteLine("I'm sorry, I don't know what to do now!");
+                    nextTask = NextTask.GameOver;
+                    break;
             }
         }
 
         public int ScoreHand(Player player)
         {
             int score = 0;
-            if (cheating == true && player.status == PlayerStatus.active)
+            if (cheating == true && player.status == PlayerStatus.active) // cheat
             {
                 string response = null;
                 while (int.TryParse(response, out score) == false)
@@ -124,65 +178,193 @@ namespace RaceTo21
             }
             else
             {
-                foreach (string card in player.cards)
-                {
-                    string faceValue = card.Remove(card.Length - 1);
-                    switch (faceValue)
-                    {
-                        case "K":
-                        case "Q":
-                        case "J":
-                            score = score + 10;
-                            break;
-                        case "A":
-                            score = score + 1;
-                            break;
-                        default:
-                            score = score + int.Parse(faceValue);
-                            break;
-                    }
-                }
+                score = player.HandScore();
             }
             return score;
         }
 
-        public bool CheckActivePlayers()
+        public bool CheckRoundEnd(ref Player winner)
         {
+            //Check who has 21
             foreach (var player in players)
             {
-                if (player.status == PlayerStatus.active)
+                if (player.status == PlayerStatus.win)
                 {
-                    return true; // at least one player is still going!
+                    winner = player;
+                    return false; //  the 21 winner
                 }
-            }
-            return false; // everyone has stayed or busted, or someone won!
-        }
 
-        public Player DoFinalScoring()
-        {
-            int highScore = 0;
-            foreach (var player in players)
+            }
+
+            foreach (var playerA in players)
             {
-                cardTable.ShowHand(player);
-                if (player.status == PlayerStatus.win) // someone hit 21
+                if (playerA.status != PlayerStatus.bust)
                 {
-                    return player;
-                }
-                if (player.status == PlayerStatus.stay) // still could win...
-                {
-                    if (player.score > highScore)
+                    foreach (var playerB in players.Skip(players.LastIndexOf(playerA) + 1)) // skip the front players
                     {
-                        highScore = player.score;
+                        if (playerB.status != PlayerStatus.bust && (playerA.status == PlayerStatus.active || playerB.status == PlayerStatus.active))
+                            return true; // at least two players is still going!
                     }
                 }
-                // if busted don't bother checking!
+
+                if (playerA.status == PlayerStatus.active)
+                {
+                    // else all others have busted
+                    winner = playerA;
+                    return false;
+                }
+
+                if (playerA.status == PlayerStatus.stay)
+                {
+                    if (winner == null)
+                    {
+                        winner = playerA;
+                    }
+                    else {
+                        winner = CompareScore(winner, playerA);
+
+                    }
+                    foreach (var playerB in players)
+                    {
+                        if (playerB.status != PlayerStatus.bust)
+                        {
+                            //use turn count for tiebreaker 
+                            winner = CompareScore(playerB, winner);
+                        }
+                    }
+
+                    return false; // all others bust or the highest score
+                }
+
+
             }
-            if (highScore > 0) // someone scored, anyway!
+
+            Player CompareScore(Player p1, Player p2)
             {
-                // find the FIRST player in list who meets win condition
-                return players.Find(player => player.score == highScore);
+                if (p2.HandScore() > p1.HandScore())
+                {
+                    return p2; // higher
+                }
+                else if (p1.HandScore() == p2.HandScore())
+                {
+                    if (p2.activedTurn < p2.activedTurn)
+                    {
+                        return p2;
+                    }
+
+                    if (p2.activedTurn == p1.activedTurn)
+                    {
+                        if (GetPlayerIndex(p2) < GetPlayerIndex(p1))
+                        {
+                            return p2;
+                        }
+                    }
+                }
+
+                return p1;
             }
-            return null; // everyone must have busted because nobody won!
+
+            int GetPlayerIndex(Player player)
+            {
+                return players.LastIndexOf(player);
+            }
+
+            Console.WriteLine("You are cheating!!");
+            //all busted
+            return false;
         }
+
+
+        // Check the if any player reach the target score
+        private void DoScoring(Player winner)
+        {
+            foreach (var player in players)
+            {
+                if (player == winner)
+                {
+                    player.AddScore(player.HandScore());
+                }
+                else
+                {
+                    if (player.status == PlayerStatus.stay) // someone hit 21
+                    {
+                        //do nothing
+                    }
+
+                    if (player.status == PlayerStatus.bust) // still could win...
+                    {
+                        player.AddScore( 21 - player.HandScore());
+                    }
+                }
+            }
+
+
+        }
+
+        private void ResetRound(bool ShufflePlayers = false, Player winner = null)
+        {
+            /*
+             * shuffle the order of players to prevent const tie breaker
+             * 
+             */
+
+            // draw out the winner player
+            if (winner != null)
+            {
+                if (!players.Remove(winner))
+                {
+                    throw new Exception("WInner not found");
+                }
+            }
+            // shuffle players
+            if (ShufflePlayers)
+            {
+                Random rng = new Random();
+
+                // one-line method that uses Linq:
+                players = players.OrderBy(p => rng.Next()).ToList();
+            }
+
+            // add winner to the last
+            if (winner != null)
+            {
+                players.Add(winner);
+            }
+
+            currentPlayer = 0;
+            deck.BuildDeck();
+            deck.Shuffle();
+            foreach (Player player in players)
+            {
+                player.ResetRound();
+            }
+        }
+
+        // check if a player reach the target score
+        private bool DoFinalScoring()
+        {
+            // ask player if to continue play
+            // if there is only one player , let the player win
+            // a loop here to ask player if want to continue, if not remove the player from players list
+            if (players.Count == 1)
+            {
+                cardTable.AnnounceFinalWinner(players[0]);
+                return true;
+            }
+
+            foreach (var player in players)
+            {
+                if (player.score >= targetScore)
+                {
+                    cardTable.AnnounceFinalWinner(player);
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+
+       
     }
 }

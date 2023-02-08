@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-
+using System.Linq;
 namespace RaceTo21
 {
     public class CardTable
     {
+        static Dictionary<string, string> cardImage = null;
         public CardTable()
         {
+            
             Console.WriteLine("Setting Up Table...");
         }
 
@@ -85,13 +87,32 @@ namespace RaceTo21
         {
             if (player.cards.Count > 0)
             {
+                /*
+                 * 
+                 * format card printing with commas
+                 * 
+                 */
                 Console.Write(player.name + " has: ");
-                foreach (string card in player.cards)
+                foreach (Card card in player.cards)
                 {
                     Console.Write(card + " ");
+                    //print comma between two cards
+                    if (player.cards.LastIndexOf(card) < player.cards.Count - 1) Console.Write(",");
+
+                    Console.Write(" ");
                 }
-                Console.Write("=" + player.score + "/21 ");
-                if (player.status != PlayerStatus.active)
+                Console.Write("=" + player.HandScore() + "/21 ");
+                if (player.status != PlayerStatus.active)// refactor here
+                {
+                    Console.Write("(" + player.status.ToString().ToUpper() + ")");
+                }
+                Console.WriteLine();
+            }
+            else
+            {
+                Console.Write(player.name + " has NO cards ");
+                Console.Write("=" + player.HandScore() + "/21 ");
+                if (player.status != PlayerStatus.active)// refactor here
                 {
                     Console.Write("(" + player.status.ToString().ToUpper() + ")");
                 }
@@ -107,19 +128,103 @@ namespace RaceTo21
             }
         }
 
-
-        public void AnnounceWinner(Player player)
+        public void ShowScore(Player player, int targetScore)
         {
+            Console.Write(player.name + " score: ");
+            Console.WriteLine($"{player.score}/{targetScore}");
+        }
+
+        public void ShowScoreBoard(List<Player> players, int targetScore)
+        {
+            List<Player> orederPlayers = players.OrderBy(player => player.score).ToList();
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("=====Score Board====");
+            foreach (Player player in orederPlayers)
+            {
+                ShowScore(player, targetScore);
+            }
+            Console.WriteLine("====================");
+            Console.ResetColor();
+        }
+
+        public bool AskExitGame()
+        {
+            Console.ForegroundColor = ConsoleColor.DarkGreen;
+            bool ans;
+            while (true)
+            {
+                Console.WriteLine("Do ALL players want to continue?");
+                Console.WriteLine("Press <Enter> to continue...Press \"q\" to Exit...");
+                var key = Console.ReadKey().Key;
+                if (key == ConsoleKey.Enter)
+                {
+                    ans = false;
+                    break;
+                }
+                if (key == ConsoleKey.Q)
+                {
+                    ans = true;
+                    break;
+                }
+            }
+
+            Console.ResetColor();
+            return ans;
+        }
+
+        public void AnnounceRoundWinner(Player player)
+        {
+            Console.ForegroundColor = ConsoleColor.Blue;
             if (player != null)
             {
+                Console.WriteLine("✿✿✿✿✿✿✿✿✿✿✿✿✿✿✿✿✿✿✿");
                 Console.WriteLine(player.name + " wins!");
+                Console.WriteLine("✿✿✿✿✿✿✿✿✿✿✿✿✿✿✿✿✿✿✿");
             }
             else
             {
+                // should not go there
                 Console.WriteLine("Everyone busted!");
             }
+            Console.WriteLine("The round ends... ");
+
+            Console.ResetColor();
+        }
+
+        public void AnnounceFinalWinner(Player player)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            if (player != null)
+            {
+                Console.WriteLine("***************************************");
+                Console.WriteLine("⚘⚘⚘⚘⚘⚘⚘⚘⚘⚘⚘⚘⚘⚘⚘⚘⚘⚘⚘⚘⚘⚘⚘⚘⚘⚘⚘⚘⚘⚘⚘⚘⚘⚘⚘⚘⚘⚘");
+                Console.WriteLine(player.name + " is the Final winner!!!");
+                Console.WriteLine("⚘⚘⚘⚘⚘⚘⚘⚘⚘⚘⚘⚘⚘⚘⚘⚘⚘⚘⚘⚘⚘⚘⚘⚘⚘⚘⚘⚘⚘⚘⚘⚘⚘⚘⚘⚘⚘⚘");
+                Console.WriteLine("***************************************");
+            }
+            else
+            {
+                // should not go there
+                Console.WriteLine("Everyone Lose");
+            }
+            Console.ResetColor();
             Console.Write("Press <Enter> to exit... ");
             while (Console.ReadKey().Key != ConsoleKey.Enter) { }
+        }
+
+        public void InitializeCardImagePath(Deck deck)
+        {
+            Console.WriteLine("************ Initializing Card image paths....");
+           
+            cardImage = new Dictionary<string, string>();
+
+            List<Card> cards = deck.GetCards();
+            foreach (Card card in cards)
+            {
+                cardImage.Add(card.short_name, $"card_{card.GetSuitName().ToLower()}_{card.GetShortValueName().ToUpper()}.png");
+                Console.WriteLine(card.short_name + " " + cardImage[card.short_name]);
+            }
+           
         }
     }
 }

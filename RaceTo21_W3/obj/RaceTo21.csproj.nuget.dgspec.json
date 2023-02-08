@@ -1,29 +1,25 @@
 {
   "format": 1,
   "restore": {
-    "/Users/jay/NU/DGM6308_Winter2023/RaceTo21_W4_Starter/RaceTo21_W3/RaceTo21.csproj": {}
+    "/Users/miku/Documents/CSProject/RaceTo21_W4_Starter/RaceTo21_W3/RaceTo21.csproj": {}
   },
   "projects": {
-    "/Users/jay/NU/DGM6308_Winter2023/RaceTo21_W4_Starter/RaceTo21_W3/RaceTo21.csproj": {
+    "/Users/miku/Documents/CSProject/RaceTo21_W4_Starter/RaceTo21_W3/RaceTo21.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/jay/NU/DGM6308_Winter2023/RaceTo21_W4_Starter/RaceTo21_W3/RaceTo21.csproj",
+        "projectUniqueName": "/Users/miku/Documents/CSProject/RaceTo21_W4_Starter/RaceTo21_W3/RaceTo21.csproj",
         "projectName": "RaceTo21_W3",
-        "projectPath": "/Users/jay/NU/DGM6308_Winter2023/RaceTo21_W4_Starter/RaceTo21_W3/RaceTo21.csproj",
-        "packagesPath": "/Users/jay/.nuget/packages/",
-        "outputPath": "/Users/jay/NU/DGM6308_Winter2023/RaceTo21_W4_Starter/RaceTo21_W3/obj/",
+        "projectPath": "/Users/miku/Documents/CSProject/RaceTo21_W4_Starter/RaceTo21_W3/RaceTo21.csproj",
+        "packagesPath": "/Users/miku/.nuget/packages/",
+        "outputPath": "/Users/miku/Documents/CSProject/RaceTo21_W4_Starter/RaceTo21_W3/obj/",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "/usr/local/share/dotnet/sdk/NuGetFallbackFolder"
-        ],
         "configFilePaths": [
-          "/Users/jay/.nuget/NuGet/NuGet.Config"
+          "/Users/miku/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net5.0"
         ],
         "sources": {
-          "/usr/local/share/dotnet/library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -52,6 +48,20 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
+          "downloadDependencies": [
+            {
+              "name": "Microsoft.AspNetCore.App.Ref",
+              "version": "[5.0.0, 5.0.0]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Host.osx-x64",
+              "version": "[5.0.17, 5.0.17]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Ref",
+              "version": "[5.0.0, 5.0.0]"
+            }
+          ],
           "frameworkReferences": {
             "Microsoft.NETCore.App": {
               "privateAssets": "all"
