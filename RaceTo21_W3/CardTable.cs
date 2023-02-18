@@ -95,13 +95,13 @@ namespace RaceTo21
                 Console.Write(player.name + " has: ");
                 foreach (Card card in player.cards)
                 {
-                    Console.Write(card + " ");
+                    Console.Write(card);
                     //print comma between two cards
                     if (player.cards.LastIndexOf(card) < player.cards.Count - 1) Console.Write(",");
 
                     Console.Write(" ");
                 }
-                Console.Write("=" + player.HandScore() + "/21 ");
+                Console.Write("= " + player.HandScore() + "/21 ");
                 if (player.status != PlayerStatus.active)// refactor here
                 {
                     Console.Write("(" + player.status.ToString().ToUpper() + ")");
@@ -111,7 +111,7 @@ namespace RaceTo21
             else
             {
                 Console.Write(player.name + " has NO cards ");
-                Console.Write("=" + player.HandScore() + "/21 ");
+                Console.Write("= " + player.HandScore() + "/21 ");
                 if (player.status != PlayerStatus.active)// refactor here
                 {
                     Console.Write("(" + player.status.ToString().ToUpper() + ")");
@@ -137,7 +137,7 @@ namespace RaceTo21
         public void ShowScoreBoard(List<Player> players, int targetScore)
         {
             List<Player> orederPlayers = players.OrderBy(player => player.score).ToList();
-            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.ForegroundColor = ConsoleColor.DarkYellow;
             Console.WriteLine("=====Score Board====");
             foreach (Player player in orederPlayers)
             {
@@ -174,7 +174,7 @@ namespace RaceTo21
 
         public void AnnounceRoundWinner(Player player)
         {
-            Console.ForegroundColor = ConsoleColor.Blue;
+            Console.ForegroundColor = ConsoleColor.DarkBlue;
             if (player != null)
             {
                 Console.WriteLine("✿✿✿✿✿✿✿✿✿✿✿✿✿✿✿✿✿✿✿");
