@@ -1,14 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Xml.Linq;
+
 namespace RaceTo21
 {
     public class CardTable
     {
-        static Dictionary<string, string> cardImage = null;
+        static Dictionary<string, string> cardImage = null; // Used to store the card image path.
+
         public CardTable()
         {
-            
+
             Console.WriteLine("Setting Up Table...");
         }
 
@@ -21,7 +25,7 @@ namespace RaceTo21
         {
             for (int i = 0; i < players.Count; i++)
             {
-                players[i].Introduce(i+1); // List is 0-indexed but user-friendly player positions would start with 1...
+                Console.WriteLine("Hello, my name is " + players[i].name + " and I am player #" + (i + 1)); // List is 0-indexed but user-friendly player positions would start with 1...
             }
         }
 
@@ -43,7 +47,7 @@ namespace RaceTo21
             }
             return numberOfPlayers;
         }
-
+       
         /* Gets the name of a player
          * Is called by Game object
          * Game object provides player number
@@ -61,7 +65,15 @@ namespace RaceTo21
             }
             return response;
         }
-
+        /// <summary>
+        /// Output to console.
+        /// Prompts whether the player wants to draw cards.
+        /// Returns true if the player wants to draw a card
+        /// Returns false if the player does not want to draw cards
+        /// Otherwise wait for correct input
+        /// </summary>
+        /// <param name="player"> A player in the game </param>
+        /// <returns></returns>
         public bool OfferACard(Player player)
         {
             while (true)
@@ -83,9 +95,18 @@ namespace RaceTo21
             }
         }
 
+        /// <summary>
+        /// Output to console.
+        /// Display the specified player's hand and score.
+        /// e.g. 
+        /// p1 has NO cards = 0/21 (STAY)
+        /// p2 has: Two of Diamonds, Three of Hearts = 5/21
+        /// p3 has: A of Spades, Nine of Diamonds = 10/21
+        /// </summary>
+        /// <param name="player"> A player in the game </param>
         public void ShowHand(Player player)
         {
-            if (player.cards.Count > 0)
+            if (player.GetCards().Count > 0)
             {
                 /*
                  * 
@@ -93,11 +114,11 @@ namespace RaceTo21
                  * 
                  */
                 Console.Write(player.name + " has: ");
-                foreach (Card card in player.cards)
+                foreach (Card card in player.GetCards())
                 {
                     Console.Write(card);
                     //print comma between two cards
-                    if (player.cards.LastIndexOf(card) < player.cards.Count - 1) Console.Write(",");
+                    if (player.GetCards().LastIndexOf(card) < player.GetCards().Count - 1) Console.Write(",");
 
                     Console.Write(" ");
                 }
@@ -120,6 +141,12 @@ namespace RaceTo21
             }
         }
 
+        /// <summary>
+        /// Output to console.
+        /// Displays all player hands and scores.
+        /// The first argument requires all players.
+        /// </summary>
+        /// <param name="players"> All players in the game </param>
         public void ShowHands(List<Player> players)
         {
             foreach (Player player in players)
@@ -128,15 +155,31 @@ namespace RaceTo21
             }
         }
 
+        /// <summary>
+        /// Output to console.
+        /// Displays the score of the player.
+        /// The first argument requires a player, and the second argument requires the goal score of the game.
+        /// </summary>
+        /// <param name="player"> The player </param>
+        /// <param name="targetScore"> The goal score of the game </param>
         public void ShowScore(Player player, int targetScore)
         {
             Console.Write(player.name + " score: ");
             Console.WriteLine($"{player.score}/{targetScore}");
         }
 
+
+        /// <summary>
+        /// Output to console.
+        /// Displays the total score of all players.
+        /// Playerscores are sorted from highest to lowest.
+        /// The first argument requires all players, and the second argument requires the goal score of the game.
+        /// </summary>
+        /// <param name="players"> All players in the game </param>
+        /// <param name="targetScore"> The goal score of the game </param>
         public void ShowScoreBoard(List<Player> players, int targetScore)
         {
-            List<Player> orederPlayers = players.OrderBy(player => player.score).ToList();
+            List<Player> orederPlayers = players.OrderBy(player => player.score).Reverse().ToList();
             Console.ForegroundColor = ConsoleColor.DarkYellow;
             Console.WriteLine("=====Score Board====");
             foreach (Player player in orederPlayers)
@@ -147,6 +190,15 @@ namespace RaceTo21
             Console.ResetColor();
         }
 
+
+        /// <summary>
+        /// Output to console.
+        /// Prompts the player if they want to interrupt the game.
+        /// Returns true if the player typed 'q'
+        /// Returns false, if the player typed the enter key
+        /// Otherwise wait for correct input
+        /// </summary>
+        /// <returns> The result of player‘s choice </returns>
         public bool AskExitGame()
         {
             Console.ForegroundColor = ConsoleColor.DarkGreen;
@@ -172,6 +224,11 @@ namespace RaceTo21
             return ans;
         }
 
+        /// <summary>
+        /// Output to console.
+        /// Prompts The player with the highest score in the end. If argument is null, it will output "Everyone busted!"
+        /// </summary>
+        /// <param name="player"> The winning player </param>
         public void AnnounceRoundWinner(Player player)
         {
             Console.ForegroundColor = ConsoleColor.DarkBlue;
@@ -190,7 +247,11 @@ namespace RaceTo21
 
             Console.ResetColor();
         }
-
+        /// <summary>
+        /// /// Output to console. 
+        /// Prompts The player with the highest accumulated score in the end. If argument is null, it will output "everyone lose"
+        /// </summary>
+        /// <param name="player"> The winning player </param>
         public void AnnounceFinalWinner(Player player)
         {
             Console.ForegroundColor = ConsoleColor.Red;
@@ -204,7 +265,7 @@ namespace RaceTo21
             }
             else
             {
-                // should not go there
+                // should NOT go there
                 Console.WriteLine("Everyone Lose");
             }
             Console.ResetColor();
@@ -212,19 +273,37 @@ namespace RaceTo21
             while (Console.ReadKey().Key != ConsoleKey.Enter) { }
         }
 
+        /// <summary>
+        /// Use the card in the Deck to create the path of the card image and store it as a dictionary.
+        /// The path format is “card_cardsuit_cardformattedvalue.png”.
+        /// Used for kenny asset.
+        /// </summary>
+        /// <param name="deck"> The deck used for game </param>
         public void InitializeCardImagePath(Deck deck)
         {
-            Console.WriteLine("************ Initializing Card image paths....");
-           
+            //Console.WriteLine("************ Initializing Card image paths....");
+
             cardImage = new Dictionary<string, string>();
 
             List<Card> cards = deck.GetCards();
             foreach (Card card in cards)
             {
-                cardImage.Add(card.short_name, $"card_{card.GetSuitName().ToLower()}_{card.GetShortValueName().ToUpper()}.png");
-                Console.WriteLine(card.short_name + " " + cardImage[card.short_name]);
+                cardImage.Add(card.ShortName, $"card_{card.GetSuitName().ToLower()}_{card.GetFormattedValueName().ToUpper()}.png");
+                //Console.WriteLine(card.ShortName + " " + cardImage[card.ShortName]);
             }
-           
+
+        }
+
+        /// <summary>
+        /// Prompts cheating mode is enabled
+        /// </summary>
+        public void Cheating()
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("***************************************");
+            Console.WriteLine("************* Cheating MODE ***********");
+            Console.WriteLine("***************************************");
+            Console.ResetColor();
         }
     }
 }

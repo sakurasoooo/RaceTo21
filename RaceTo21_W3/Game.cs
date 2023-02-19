@@ -27,10 +27,12 @@ namespace RaceTo21
             deck.ShowAllCards();// Comment out this LINE
 
             nextTask = NextTask.GetNumberOfPlayers;
-            
+
             //Test
             cardTable.InitializeCardImagePath(deck);// Comment out this LINE
             Console.ResetColor();
+
+            if (cheating) cardTable.Cheating();
         }
 
         /* Adds a player to the current game
@@ -85,12 +87,16 @@ namespace RaceTo21
                     Player player = players[currentPlayer];
                     if (player.status == PlayerStatus.active)
                     {
-                        player.RoundStart();// use for final score
+                        player.TurnStart();// use for final score
                         if (cardTable.OfferACard(player))
                         {
                             Card card = deck.DealTopCard();
-                            player.cards.Add(card);
-                            int playerScore = ScoreHand(player);
+                            player.AddCard(card);
+
+
+                            CheatScoreHand(player);// enable cheating
+
+                            int playerScore = player.HandScore();
                             if (playerScore > 21)
                             {
                                 player.status = PlayerStatus.bust;
@@ -110,8 +116,7 @@ namespace RaceTo21
                     break;
 
                 case NextTask.CheckForEnd:
-                    Player winner = null;
-                    if (!CheckRoundEnd(ref winner))
+                    if (CheckRoundEnd(out Player winner))
                     {
                         rounds++; // increase at the end of each ROUND
                         cardTable.ShowHands(players);
@@ -126,15 +131,18 @@ namespace RaceTo21
                         DoScoring(winner);
                         cardTable.ShowScoreBoard(players, targetScore);
                         // ask all players if want to continue
+                        
+                        if (DoFinalScoring())
+                        {
+                            nextTask = NextTask.GameOver;
+                            break;
+                        }
                         if (cardTable.AskExitGame())
                         {
                             nextTask = NextTask.GameOver;
                             break;
                         }
-                        if (DoFinalScoring())
-                        {
-                            nextTask = NextTask.GameOver;
-                        }else
+                        else
                         {
                             // Start New turn
                             // CardTable print new turn msg
@@ -162,40 +170,69 @@ namespace RaceTo21
                     break;
             }
         }
-
-        public int ScoreHand(Player player)
+        /// <summary>
+        /// A method used for cheating, to refill the player's hand with random cards based on player input.
+        /// For testing only!
+        /// </summary>
+        /// <param name="player"></param>
+        public void CheatScoreHand(Player player)
         {
             int score = 0;
             if (cheating == true && player.status == PlayerStatus.active) // cheat
             {
+                Random rand = new Random();
+                player.ClearHand();
                 string response = null;
                 while (int.TryParse(response, out score) == false)
                 {
                     Console.Write("OK, what should player " + player.name + "'s score be?");
                     response = Console.ReadLine();
                 }
-                return score;
+
+                while (score > 0)
+                {
+                    if (score >= 10)
+                    {
+                        score -= 10;
+                        player.AddCard(new Card((CardSuit)rand.Next(0, 4), (CardName)rand.Next(10, 14)));
+                    }
+                    else
+                    {
+                        player.AddCard(new Card((CardSuit)rand.Next(0, 4), (CardName)score));
+                        score -= score;
+                    }
+                }
             }
-            else
-            {
-                score = player.HandScore();
-            }
-            return score;
+
         }
 
-        public bool CheckRoundEnd(ref Player winner)
+        /// <summary>
+        /// Checks if round should end.
+        /// Return true if round is over, and return the winner. Otherwise return false.
+        ///
+        /// First check to see if any player has a score of 21. Return true if so.
+        /// Then check if at least one player is active and one player is not bust, then don't end the game if so.
+        /// Then if the player is in the active state, the other players must be in the bust state.
+        /// Finally check all players with stay status.
+        /// The player should not be all bust, although will still return true
+        /// </summary>
+        /// <param name="winner"> The variable used to accept the return value. </param>
+        /// <returns></returns>
+        private bool CheckRoundEnd(out Player winner)
         {
+            winner = null;
             //Check who has 21
             foreach (var player in players)
             {
                 if (player.status == PlayerStatus.win)
                 {
                     winner = player;
-                    return false; //  the 21 winner
+                    return true; //  the 21 winner
                 }
 
             }
 
+            // find the first player who is not bust
             foreach (var playerA in players)
             {
                 if (playerA.status != PlayerStatus.bust)
@@ -203,42 +240,48 @@ namespace RaceTo21
                     foreach (var playerB in players.Skip(players.LastIndexOf(playerA) + 1)) // skip the front players
                     {
                         if (playerB.status != PlayerStatus.bust && (playerA.status == PlayerStatus.active || playerB.status == PlayerStatus.active))
-                            return true; // at least two players is still going!
+                            return false; // at least two players is still going!
                     }
-                }
 
-                if (playerA.status == PlayerStatus.active)
-                {
-                    // else all others have busted
-                    winner = playerA;
-                    return false;
-                }
 
-                if (playerA.status == PlayerStatus.stay)
-                {
-                    if (winner == null)
+                    if (playerA.status == PlayerStatus.active)
                     {
+                        // playerA is active but all others have busted 
                         winner = playerA;
+                        return true;
                     }
-                    else {
-                        winner = CompareScore(winner, playerA);
 
-                    }
-                    foreach (var playerB in players)
+                    if (playerA.status == PlayerStatus.stay)
                     {
-                        if (playerB.status != PlayerStatus.bust)
+                        if (winner == null)
                         {
-                            //use turn count for tiebreaker 
-                            winner = CompareScore(playerB, winner);
+                            winner = playerA;
                         }
+                        else
+                        {
+                            winner = CompareScore(winner, playerA);
+
+                        }
+                        foreach (var playerB in players.Skip(players.LastIndexOf(playerA) + 1))
+                        {
+                            if (playerB.status != PlayerStatus.bust) // playerB can be only in stay status
+                            {
+                                //use turn count for tiebreaker 
+                                winner = CompareScore(playerB, winner);
+                            }
+                        }
+
                     }
-
-                    return false; // all others bust or the highest score
+                    // player A is stay but all others have busted
+                    // or The winner among the stay status players
+                    return true;
                 }
-
 
             }
 
+            // Compares two players and returns the winner.
+            // The one with the highest score is the winner.
+            // If the scores are tied, the player with the fewest active state rounds is the winner.
             Player CompareScore(Player p1, Player p2)
             {
                 if (p2.HandScore() > p1.HandScore())
@@ -247,7 +290,7 @@ namespace RaceTo21
                 }
                 else if (p1.HandScore() == p2.HandScore())
                 {
-                    if (p2.activedTurn < p2.activedTurn)
+                    if (p2.activedTurn < p1.activedTurn)
                     {
                         return p2;
                     }
@@ -264,17 +307,23 @@ namespace RaceTo21
                 return p1;
             }
 
+            // Get the index of the player in players list
             int GetPlayerIndex(Player player)
             {
                 return players.LastIndexOf(player);
             }
 
             Console.WriteLine("You are cheating!!");
-            //all busted
-            return false;
+            // should not go here
+            //throw new Exception("CheckRoundEnd error");
+            return true; // all ones bust by cheating
         }
 
-
+        /// <summary>
+        /// Update the total score of all players.
+        /// Only the winner gets points.
+        /// </summary>
+        /// <param name="winner"> The winning player </param>
         // Check the if any player reach the target score
         private void DoScoring(Player winner)
         {
@@ -293,14 +342,22 @@ namespace RaceTo21
 
                     if (player.status == PlayerStatus.bust) // still could win...
                     {
-                        player.AddScore( 21 - player.HandScore());
+                        player.AddScore(21 - player.HandScore());
                     }
                 }
             }
 
 
         }
-
+        /// <summary>
+        /// Reset game state other than gamerscore.
+        /// Reshuffle the cards and empty the player's hand.
+        /// If the first argument is true, the order of the players will be shuffled.
+        /// If the second argument is a player, that player will be placed last among all players.
+        /// </summary>
+        /// <param name="ShufflePlayers"> Whether to disrupt the player </param>
+        /// <param name="winner"> The winning player </param>
+        /// <exception cref="Exception"> Player not exist in the game </exception>
         private void ResetRound(bool ShufflePlayers = false, Player winner = null)
         {
             /*
@@ -313,7 +370,7 @@ namespace RaceTo21
             {
                 if (!players.Remove(winner))
                 {
-                    throw new Exception("WInner not found");
+                    throw new Exception("The player does not found");
                 }
             }
             // shuffle players
@@ -340,13 +397,20 @@ namespace RaceTo21
             }
         }
 
+        /// <summary>
+        /// Checks if the game is over
+        /// Return true if the number of players is less than 2
+        /// otherwise Return true if any player's score reaches the target score
+        /// otherwise return false
+        /// </summary>
+        /// <returns> game over state </returns>
         // check if a player reach the target score
         private bool DoFinalScoring()
         {
             // ask player if to continue play
             // if there is only one player , let the player win
             // a loop here to ask player if want to continue, if not remove the player from players list
-            if (players.Count == 1)
+            if (players.Count <= 1)
             {
                 cardTable.AnnounceFinalWinner(players[0]);
                 return true;
@@ -365,6 +429,6 @@ namespace RaceTo21
         }
 
 
-       
+
     }
 }

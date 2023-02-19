@@ -6,9 +6,9 @@ namespace RaceTo21
 {
     public class Deck
     {
-        List<Card> cards = new List<Card>();
+        List<Card> cards = new List<Card>(); // Cache unshuffled cards.
 
-        List<Card> cardsCopy;
+        List<Card> cardsCopy; // cards for the game
 
         public Deck()
         {
@@ -27,7 +27,9 @@ namespace RaceTo21
             BuildDeck();
         }
 
-
+        /// <summary>
+        /// Shuffle the cards
+        /// </summary>
         public void Shuffle()
         {
             Console.WriteLine("Shuffling Cards...");
@@ -35,17 +37,17 @@ namespace RaceTo21
             Random rng = new Random();
 
             // one-line method that uses Linq:
-            // cards = cards.OrderBy(a => rng.Next()).ToList();
+            cardsCopy = cardsCopy.OrderBy(a => rng.Next()).ToList();
 
             // multi-line method that uses Array notation on a list!
             // (this should be easier to understand)
-            for (int i = 0; i < cardsCopy.Count; i++)
-            {
-                Card tmp = cardsCopy[i];
-                int swapindex = rng.Next(cardsCopy.Count);
-                cardsCopy[i] = cardsCopy[swapindex];
-                cardsCopy[swapindex] = tmp;
-            }
+            //for (int i = 0; i < cardsCopy.Count; i++)
+            //{
+            //    Card tmp = cardsCopy[i];
+            //    int swapindex = rng.Next(cardsCopy.Count);
+            //    cardsCopy[i] = cardsCopy[swapindex];
+            //    cardsCopy[swapindex] = tmp;
+            //}
         }
 
         /* Maybe we can make a variation on this that's more useful,
@@ -53,7 +55,7 @@ namespace RaceTo21
          * shuffling method(s) worked! And normally we want our card 
          * table to do all of the displaying, don't we?!
          */
-
+        // shoud be commented, useless for the game
         public void ShowAllCards()
         {
             for (int i = 0; i < cardsCopy.Count; i++)
@@ -70,6 +72,11 @@ namespace RaceTo21
             }
         }
 
+        /// <summary>
+        /// Return The top card of the deck
+        /// Pop the last card in card list
+        /// </summary>
+        /// <returns></returns>
         public Card DealTopCard()
         {
             Card card = cardsCopy[cardsCopy.Count - 1];
@@ -78,11 +85,18 @@ namespace RaceTo21
             return card;
         }
 
+        /// <summary>
+        /// Return the copy of cards
+        /// </summary>
+        /// <returns></returns>
         public List<Card> GetCards()
         {
             return cards.ToList();
         }
 
+        /// <summary>
+        /// Create a new unshuffled card deck.
+        /// </summary>
         public void BuildDeck()
         {
             cardsCopy = GetCards();

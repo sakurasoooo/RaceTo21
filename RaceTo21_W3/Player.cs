@@ -1,29 +1,41 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace RaceTo21
 {
 	public class Player
 	{
-		public string name;
-		public List<Card> cards = new List<Card>();
+		/// <summary>
+		/// The name of the player
+		/// </summary>
+		public string name { get; private set; }
+        /// <summary>
+        /// The cards in player's hand, readonly
+        /// </summary>
+        readonly private List<Card> cards = new List<Card>();
+		/// <summary>
+		/// The status of the player
+		/// </summary>
 		public PlayerStatus status = PlayerStatus.active;
-		public int score { get; private set; }
-		public int activedTurn { get; private set; } = 0;
+		/// <summary>
+		/// The score of the player, readonly
+		/// </summary>
+		public int score { get; private set; } = 0;
+        /// <summary>
+        /// The number of turns the player remains active. Often used to compare tiebreakers, readonly
+        /// </summary>
+        public int activedTurn { get; private set; } = 0;
 
         public Player(string n)
 		{
 			name = n;
         }
 
-		/* Introduces player by name
-		 * Called by CardTable object
-		 */
-		public void Introduce(int playerNum)
-		{
-			Console.WriteLine("Hello, my name is " + name + " and I am player #" + playerNum);
-		}
-
+		/// <summary>
+		/// return the hand score of the player, according the cards in hand
+		/// </summary>
+		/// <returns></returns>
 		public int HandScore()
 		{
 			int handScore = 0;
@@ -34,6 +46,9 @@ namespace RaceTo21
 			return handScore;
 		}
 
+		/// <summary>
+		/// remove all the cards in players hand 
+		/// </summary>
 		public void ClearHand()
 		{
 			cards.Clear();
@@ -52,20 +67,41 @@ namespace RaceTo21
 			activedTurn = 0;
 		}
 
-		/*
-		 * 
-		 * score setter
-		 * 
-		 */
+		/// <summary>
+		/// Add score to total score of the player, (not hand score)
+		/// </summary>
+		/// <param name="score"> the score player earned </param>
 		public void AddScore(int score)
 		{
 			this.score += score;
 		}
 
-		public void RoundStart()
+        /// <summary>
+        /// Call on the start of the each turn of the player,
+        /// Increase the activedTurn counter by 1
+        /// </summary>
+        public void TurnStart()
 		{
 			if (status == PlayerStatus.active) activedTurn++;
 		}
+
+        /// <summary>
+        /// Add a card to player's hand,
+        /// call when player draw a card
+        /// </summary>
+        /// <param name="card"> the card player drawn </param>
+        public void AddCard(Card card)
+		{
+			cards.Add(card);
+		}
+		/// <summary>
+		/// Return the copy of cards in player's hand
+		/// </summary>
+		/// <returns></returns>
+		public List<Card> GetCards()
+		{
+			return cards.ToList();
+        }
 	}
 }
 
