@@ -93,8 +93,8 @@ namespace RaceTo21
         /// <summary>
         /// Return the copy of cards
         /// </summary>
-        /// <returns></returns>
-        public List<Card> GetCards()
+        /// <returns> the copy of cards </returns>
+        public List<Card> GetAllCards()
         {
             return cards.ToList();
         }
@@ -104,7 +104,16 @@ namespace RaceTo21
         /// </summary>
         public void BuildDeck()
         {
-            cardsCopy = GetCards();
+            cardsCopy = GetAllCards();
+        }
+
+        /// <summary>
+        /// Return the copy of cardCopys
+        /// </summary>
+        /// <returns> the copy of cardsCopy </returns>
+        public List<Card> Cards()
+        {
+            return cardsCopy.ToList();
         }
     }
 }

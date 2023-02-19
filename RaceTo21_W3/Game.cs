@@ -107,6 +107,7 @@ namespace RaceTo21
 
                     CardTable.ShowHands(players);
                     Player player = players[currentPlayer];
+                    CardTable.ShowProbability(BustProbability(player,1), BustProbability(player, 2), BustProbability(player, 3));
                     if (player.status == PlayerStatus.active)
                     {
                         player.SetTurn(turns);// use for final score
@@ -142,7 +143,7 @@ namespace RaceTo21
                 case NextTask.CheckForEnd:
                     if (CheckRoundEnd(out Player winner))
                     {
-                        
+
                         CardTable.ShowHands(players);
                         CardTable.AnnounceRoundWinner(winner);
 
@@ -352,7 +353,7 @@ namespace RaceTo21
                 return p1;
             }
 
-           
+
 
             Console.WriteLine("You are cheating!!");
             // should not go here
@@ -485,6 +486,78 @@ namespace RaceTo21
         private int GetPlayerIndex(Player player)
         {
             return players.LastIndexOf(player);
+        }
+
+        /// <summary>
+        /// Calculate the the % Probability player gets bust after drawing x cards;
+        /// </summary>
+        /// <param name="player"> The player </param>
+        /// <param name="num"> numer of cards want to draw </param>
+        /// <returns> the % Probability of bust </returns>
+        private float BustProbability(Player player, int num)
+        {
+            List<List<Card>> combinations = new List<List<Card>>();
+            var remainingCards = deck.Cards();
+            var n = remainingCards.Count; // the number of cards in deck
+            List<int> index = new List<int>();
+
+            // Prevent insufficient number of cards.
+            if (num > n) {
+                remainingCards.AddRange(deck.GetAllCards());
+                n = remainingCards.Count;
+            }
+
+            //initialize index list
+            for (int i = 0; i < num; i++)
+            {
+                index.Add(i);
+            }
+
+            // find all combinations
+            //int numofCombinations = GetNumberofCombinations(n, num);
+            for (; ; )
+            {
+                List<Card> combination = new List<Card>();
+                for (int j = 0; j < num; j++)
+                {
+                    combination.Add(remainingCards[index[j]]);
+                }
+                combinations.Add(combination);
+
+                if (index[0] == (n - num - 1)) break; // stop when there no more combinations
+
+                index = IncreaseIndex(index,n - 1);
+            }
+
+
+            //  0 0 0 -> (threshold - 2) (threshold - 1) (sthreshold)
+            List<int> IncreaseIndex(List<int> indexCopy, int threshold)
+            {
+                indexCopy[indexCopy.Count - 1]++;
+                if (indexCopy[indexCopy.Count - 1] >= threshold)
+                {
+                    indexCopy = IncreaseIndex(indexCopy.Take(indexCopy.Count - 1).ToList(), threshold);
+                    indexCopy.Add(indexCopy[indexCopy.Count - 1] + 1); // add the last element + 1 as last element
+                }
+                return indexCopy;
+            }
+
+            
+            //find the number of combinations will not bust
+            int safeScore = 21 - player.HandScore(); // must be greater or equal 0
+            int safeCombinationNum = 0;
+            foreach (var comb in combinations)
+            {
+                int combScore = 0; // the score of the Combination
+                foreach (Card card in comb)
+                {
+                    combScore += card.CardScore();
+                }
+
+                if (combScore <= (safeScore)) safeCombinationNum++;
+            }
+            
+            return (1f - (float)safeCombinationNum / (float)combinations.Count) * 100f;
         }
 
     }

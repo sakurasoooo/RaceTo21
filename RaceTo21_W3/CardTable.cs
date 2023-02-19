@@ -287,13 +287,24 @@ namespace RaceTo21
 
             cardImage = new Dictionary<string, string>();
 
-            List<Card> cards = deck.GetCards();
+            List<Card> cards = deck.GetAllCards();
             foreach (Card card in cards)
             {
                 cardImage.Add(card.ShortName, $"card_{card.GetSuitName().ToLower()}_{card.GetFormattedValueName().ToUpper()}.png");
                 //Console.WriteLine(card.ShortName + " " + cardImage[card.ShortName]);
             }
 
+        }
+
+        /// <summary>
+        /// Prompts the probability of drawing one card, two cards, and three cards bust
+        /// </summary>
+        /// <param name="oneCard"> probability of bust for one card </param>
+        /// <param name="twoCard"> probability of bust for two card </param>
+        /// <param name="threeCard"> probability of bust for three card </param>
+        public static void ShowProbability(float oneCard, float twoCard, float threeCard)
+        {
+            Console.WriteLine($"Bust%: One card: {oneCard.ToString("0.0")}%, Two card: {twoCard.ToString("0.0")}%, Three card: {threeCard.ToString("0.0")}%");
         }
 
         /// <summary>
