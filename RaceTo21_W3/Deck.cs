@@ -79,6 +79,11 @@ namespace RaceTo21
         /// <returns></returns>
         public Card DealTopCard()
         {
+            if (cardsCopy.Count <= 0) {
+                // Although unlikely, when the deck is emptied, a new deck of cards is used.
+                BuildDeck();
+                Shuffle();
+            }
             Card card = cardsCopy[cardsCopy.Count - 1];
             cardsCopy.RemoveAt(cardsCopy.Count - 1);
             // Console.WriteLine("I'm giving you " + card);

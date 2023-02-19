@@ -35,7 +35,7 @@ namespace RaceTo21
          */
         public int GetNumberOfPlayers()
         {
-            Console.Write("How many players? ");
+            Console.Write("How many players?(2-8) ");
             string response = Console.ReadLine();
             int numberOfPlayers;
             while (int.TryParse(response, out numberOfPlayers) == false
@@ -74,15 +74,16 @@ namespace RaceTo21
         /// </summary>
         /// <param name="player"> A player in the game </param>
         /// <returns></returns>
-        public bool OfferACard(Player player)
+        public bool OfferACard(Player player, out int num)
         {
+            num = 0;
             while (true)
             {
-                Console.Write(player.name + ", do you want a card? (Y/N)");
+                Console.Write(player.name + ", how many (1-3) cards do you want? (N)O to stay: ");
                 string response = Console.ReadLine();
-                if (response.ToUpper().StartsWith("Y"))
+                if (int.TryParse(response, out num))
                 {
-                    return true;
+                    if (num >= 1 && num <= 3) return true;
                 }
                 else if (response.ToUpper().StartsWith("N"))
                 {
@@ -90,7 +91,7 @@ namespace RaceTo21
                 }
                 else
                 {
-                    Console.WriteLine("Please answer Y(es) or N(o)!");
+                    Console.WriteLine("Please answer (1-3) or (N)O");
                 }
             }
         }
@@ -193,21 +194,22 @@ namespace RaceTo21
 
         /// <summary>
         /// Output to console.
-        /// Prompts the player if they want to interrupt the game.
+        /// Prompts the player if want to interrupt the game.
         /// Returns true if the player typed 'q'
         /// Returns false, if the player typed the enter key
         /// Otherwise wait for correct input
         /// </summary>
         /// <returns> The result of player‘s choice </returns>
-        public bool AskExitGame()
+        public bool AskExitGame(Player player)
         {
             Console.ForegroundColor = ConsoleColor.DarkGreen;
             bool ans;
             while (true)
             {
-                Console.WriteLine("Do ALL players want to continue?");
+                Console.WriteLine("Do player " + player.name + " want to continue?");
                 Console.WriteLine("Press <Enter> to continue...Press \"q\" to Exit...");
                 var key = Console.ReadKey().Key;
+                Console.WriteLine("");
                 if (key == ConsoleKey.Enter)
                 {
                     ans = false;

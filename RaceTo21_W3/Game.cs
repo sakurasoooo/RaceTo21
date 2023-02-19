@@ -24,12 +24,11 @@ namespace RaceTo21
             cardTable = c;
             deck.Shuffle();
 
-            deck.ShowAllCards();// Comment out this LINE
+            deck.ShowAllCards();// Comment out this LINE. just for test
 
             nextTask = NextTask.GetNumberOfPlayers;
 
-            //Test
-            cardTable.InitializeCardImagePath(deck);// Comment out this LINE
+            cardTable.InitializeCardImagePath(deck);
             Console.ResetColor();
 
             if (cheating) cardTable.Cheating();
@@ -38,9 +37,31 @@ namespace RaceTo21
         /* Adds a player to the current game
          * Called by DoNextTask() method
          */
-        public void AddPlayer(string n)
+        private void AddPlayer(string n)
         {
             players.Add(new Player(n));
+        }
+
+        /// <summary>
+        /// Adds a player to the current game
+        /// </summary>
+        /// <param name="player"></param>
+        private void AddPlayer(Player player)
+        {
+            players.Add(player);
+        }
+
+        /// <summary>
+        /// Remove the specified player from the list
+        /// </summary>
+        /// <param name="player"> The player want to remove </param>
+        /// <exception cref="Exception"></exception>
+        private void RemovePlayer(Player player)
+        {
+            if (!players.Remove(player))
+            {
+                throw new Exception("Player is not found when removing from list ");
+            }
         }
 
         /* Figures out what task to do next in game
@@ -88,11 +109,13 @@ namespace RaceTo21
                     if (player.status == PlayerStatus.active)
                     {
                         player.TurnStart();// use for final score
-                        if (cardTable.OfferACard(player))
+                        if (cardTable.OfferACard(player, out int num))
                         {
-                            Card card = deck.DealTopCard();
-                            player.AddCard(card);
-
+                            for (int i = 0; i < num; i++)
+                            {
+                                Card card = deck.DealTopCard();
+                                player.AddCard(card);
+                            }
 
                             CheatScoreHand(player);// enable cheating
 
@@ -131,13 +154,33 @@ namespace RaceTo21
                         DoScoring(winner);
                         cardTable.ShowScoreBoard(players, targetScore);
                         // ask all players if want to continue
-                        
+
                         if (DoFinalScoring())
                         {
                             nextTask = NextTask.GameOver;
                             break;
                         }
-                        if (cardTable.AskExitGame())
+                        // ask player if to continue play
+                        // if there is only one player , let the player win
+                        // a loop here to ask player if want to continue, if not remove the player from players list
+                        List<Player> removeList = new List<Player>();
+                        foreach (Player p in players)
+                        {
+                            if (cardTable.AskExitGame(p))
+                            {
+                                removeList.Add(p);
+                            }
+
+                            if (removeList.Count == (players.Count - 1)) break; // end loop if there in only one player
+                        }
+
+                        foreach (Player p in removeList)
+                        {
+                            players.Remove(p);
+                        }
+                        removeList.Clear();
+
+                        if (DoFinalScoring())
                         {
                             nextTask = NextTask.GameOver;
                             break;
@@ -350,8 +393,9 @@ namespace RaceTo21
 
         }
         /// <summary>
-        /// Reset game state other than gamerscore.
-        /// Reshuffle the cards and empty the player's hand.
+        /// Reset game state other than player's score.
+        /// Reshuffle the cards and empty the player's hand. Call before round starts;
+        /// 
         /// If the first argument is true, the order of the players will be shuffled.
         /// If the second argument is a player, that player will be placed last among all players.
         /// </summary>
@@ -407,10 +451,15 @@ namespace RaceTo21
         // check if a player reach the target score
         private bool DoFinalScoring()
         {
-            // ask player if to continue play
+            if (players.Count <= 0)
+            {
+                // Should not go here
+                throw new Exception("There is no players");
+            }
+
             // if there is only one player , let the player win
-            // a loop here to ask player if want to continue, if not remove the player from players list
-            if (players.Count <= 1)
+
+            if (players.Count == 1)
             {
                 cardTable.AnnounceFinalWinner(players[0]);
                 return true;
