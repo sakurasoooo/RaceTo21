@@ -6,8 +6,8 @@ namespace RaceTo21
     {
         static void Main(string[] args)
         {
-            CardTable cardTable = new CardTable();
-            Game game = new Game(cardTable);
+            //CardTable cardTable = new CardTable();
+            Game game = new Game();
             while (game.nextTask != NextTask.GameOver)
             {
                 game.DoNextTask();

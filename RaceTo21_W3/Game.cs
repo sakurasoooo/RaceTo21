@@ -10,28 +10,28 @@ namespace RaceTo21
     {
         int numberOfPlayers; // number of players in current game
         List<Player> players = new List<Player>(); // list of objects containing player data
-        CardTable cardTable; // object in charge of displaying game information
+        //CardTable CardTable; // object in charge of displaying game information
         Deck deck = new Deck(); // deck of cards
         int currentPlayer = 0; // current player on list
         public NextTask nextTask; // keeps track of game state
         private bool cheating = false; // lets you cheat for testing purposes if true
         int targetScore = 50; // the end condition of game
-        int rounds = 0; // the number of  rounds of game goes
+        int turns = 0; // the number of turns of game goes
 
-        public Game(CardTable c)
+        public Game()
         {
             Console.ForegroundColor = ConsoleColor.DarkGreen;
-            cardTable = c;
+            //CardTable = c;
             deck.Shuffle();
 
             deck.ShowAllCards();// Comment out this LINE. just for test
 
             nextTask = NextTask.GetNumberOfPlayers;
 
-            cardTable.InitializeCardImagePath(deck);
+            CardTable.InitializeCardImagePath(deck);
             Console.ResetColor();
 
-            if (cheating) cardTable.Cheating();
+            if (cheating) CardTable.Cheating();
         }
 
         /* Adds a player to the current game
@@ -82,7 +82,7 @@ namespace RaceTo21
             {
                 case NextTask.GetNumberOfPlayers:
 
-                    numberOfPlayers = cardTable.GetNumberOfPlayers();
+                    numberOfPlayers = CardTable.GetNumberOfPlayers();
                     nextTask = NextTask.GetNames;
                     break;
 
@@ -90,7 +90,7 @@ namespace RaceTo21
 
                     for (var count = 1; count <= numberOfPlayers; count++)
                     {
-                        var name = cardTable.GetPlayerName(count);
+                        var name = CardTable.GetPlayerName(count);
                         AddPlayer(name); // NOTE: player list will start from 0 index even though we use 1 for our count here to make the player numbering more human-friendly
                     }
                     nextTask = NextTask.IntroducePlayers;
@@ -98,18 +98,19 @@ namespace RaceTo21
 
                 case NextTask.IntroducePlayers:
 
-                    cardTable.ShowPlayers(players);
+                    CardTable.ShowPlayers(players);
                     nextTask = NextTask.PlayerTurn;
                     break;
 
                 case NextTask.PlayerTurn:
+                    turns++; // increase at the start of each turn
 
-                    cardTable.ShowHands(players);
+                    CardTable.ShowHands(players);
                     Player player = players[currentPlayer];
                     if (player.status == PlayerStatus.active)
                     {
-                        player.TurnStart();// use for final score
-                        if (cardTable.OfferACard(player, out int num))
+                        player.SetTurn(turns);// use for final score
+                        if (CardTable.OfferACard(player, out int num))
                         {
                             for (int i = 0; i < num; i++)
                             {
@@ -134,16 +135,16 @@ namespace RaceTo21
                             player.status = PlayerStatus.stay;
                         }
                     }
-                    cardTable.ShowHand(player);
+                    CardTable.ShowHand(player);
                     nextTask = NextTask.CheckForEnd;
                     break;
 
                 case NextTask.CheckForEnd:
                     if (CheckRoundEnd(out Player winner))
                     {
-                        rounds++; // increase at the end of each ROUND
-                        cardTable.ShowHands(players);
-                        cardTable.AnnounceRoundWinner(winner);
+                        
+                        CardTable.ShowHands(players);
+                        CardTable.AnnounceRoundWinner(winner);
 
                         /*
                          * 
@@ -152,7 +153,7 @@ namespace RaceTo21
                          * 
                          */
                         DoScoring(winner);
-                        cardTable.ShowScoreBoard(players, targetScore);
+                        CardTable.ShowScoreBoard(players, targetScore);
                         // ask all players if want to continue
 
                         if (DoFinalScoring())
@@ -166,7 +167,7 @@ namespace RaceTo21
                         List<Player> removeList = new List<Player>();
                         foreach (Player p in players)
                         {
-                            if (cardTable.AskExitGame(p))
+                            if (CardTable.AskExitGame(p))
                             {
                                 removeList.Add(p);
                             }
@@ -333,28 +334,25 @@ namespace RaceTo21
                 }
                 else if (p1.HandScore() == p2.HandScore())
                 {
-                    if (p2.activedTurn < p1.activedTurn)
+                    if (p2.GetCards().Count > p1.GetCards().Count)
                     {
                         return p2;
                     }
 
-                    if (p2.activedTurn == p1.activedTurn)
+                    else if (p2.GetCards().Count == p1.GetCards().Count)
                     {
-                        if (GetPlayerIndex(p2) < GetPlayerIndex(p1))
+                        if (p2.activedTurn < p1.activedTurn)
                         {
                             return p2;
                         }
+                        // same activedTurn is impossible 
                     }
                 }
 
                 return p1;
             }
 
-            // Get the index of the player in players list
-            int GetPlayerIndex(Player player)
-            {
-                return players.LastIndexOf(player);
-            }
+           
 
             Console.WriteLine("You are cheating!!");
             // should not go here
@@ -433,6 +431,7 @@ namespace RaceTo21
             }
 
             currentPlayer = 0;
+            turns = 0;
             deck.BuildDeck();
             deck.Shuffle();
             foreach (Player player in players)
@@ -461,7 +460,7 @@ namespace RaceTo21
 
             if (players.Count == 1)
             {
-                cardTable.AnnounceFinalWinner(players[0]);
+                CardTable.AnnounceFinalWinner(players[0]);
                 return true;
             }
 
@@ -469,7 +468,7 @@ namespace RaceTo21
             {
                 if (player.score >= targetScore)
                 {
-                    cardTable.AnnounceFinalWinner(player);
+                    CardTable.AnnounceFinalWinner(player);
                     return true;
                 }
             }
@@ -477,7 +476,16 @@ namespace RaceTo21
             return false;
         }
 
-
+        /// <summary>
+        /// Deprecated.
+        /// Get the index of the player in players list.
+        /// </summary>
+        /// <param name="player"> a player </param>
+        /// <returns> the index of the player in players list </returns>
+        private int GetPlayerIndex(Player player)
+        {
+            return players.LastIndexOf(player);
+        }
 
     }
 }

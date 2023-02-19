@@ -80,9 +80,9 @@ namespace RaceTo21
         /// Call on the start of the each turn of the player,
         /// Increase the activedTurn counter by 1
         /// </summary>
-        public void TurnStart()
+        public void SetTurn( int turn)
 		{
-			if (status == PlayerStatus.active) activedTurn++;
+			if (status == PlayerStatus.active) activedTurn = turn;
 		}
 
         /// <summary>
